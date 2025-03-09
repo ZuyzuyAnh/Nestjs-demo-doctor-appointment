@@ -18,14 +18,23 @@ export class AddressService {
   ) {}
 
   async create(createAddressDto: CreateAddressDto) {
-    const address = this.addressRepository.create(createAddressDto);
-    return await this.addressRepository.save(address);
-  }
-
-  async getByClinic(clinicId: number) {
-    return this.addressRepository.find({
-      where: { clinic: { id: clinicId } },
+    const district = await this.districtRepository.findOneBy({
+      id: createAddressDto.districtId,
     });
+
+    if (!district) {
+      throw new CustomNotFoundException(
+        'District',
+        createAddressDto.districtId,
+      );
+    }
+
+    const address = this.addressRepository.create({
+      streetAddress: createAddressDto.streetAddress,
+      district,
+    });
+
+    return await this.addressRepository.save(address);
   }
 
   async update(id: number, updateAddressDto: UpdateAddressDto) {

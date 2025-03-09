@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CustomNotFoundException } from 'src/exception/notfound.exception';
 import { UpdateClinicDto } from './dto/updateCLinic.dto';
 import { AddressService } from '../address/services/address.service';
+import { PaginationResponseDto } from '../utils/pagination.response.dto';
 
 @Injectable()
 export class ClinicsService {
@@ -16,20 +17,43 @@ export class ClinicsService {
   ) {}
 
   async create(createClinicDto: CreateClinicDto) {
+    const { address: addressDto } = createClinicDto;
+
+    const address = await this.addressService.create(addressDto);
+
     const clinic = this.clinicsRepository.create({
       ...createClinicDto,
-      address: createClinicDto.address
-        ? { ...createClinicDto.address }
-        : undefined,
+      address,
     });
 
     return await this.clinicsRepository.save(clinic);
   }
 
-  async findAll() {
-    return this.clinicsRepository.find({
-      relations: ['address'],
-    });
+  async findAll(
+    page: number,
+    limit: number,
+    districtId?: number,
+    cityId?: number,
+  ) {
+    const queryBuilder = this.clinicsRepository
+      .createQueryBuilder('clinics')
+      .leftJoinAndSelect('clinics.address', 'address')
+      .leftJoinAndSelect('address.district', 'district')
+      .leftJoinAndSelect('district.city', 'city')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    if (districtId) {
+      queryBuilder.andWhere('district.id = :districtId', { districtId });
+    }
+
+    if (cityId) {
+      queryBuilder.andWhere('city.id = :cityId', { cityId });
+    }
+
+    const [result, total] = await queryBuilder.getManyAndCount();
+
+    return new PaginationResponseDto(page, limit, result, total);
   }
 
   async findOneById(id: number) {
