@@ -2,8 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Address } from '../../address/entities/address.entity';
 
 @Entity()
 export class Clinic {
@@ -13,8 +16,12 @@ export class Clinic {
   @Column()
   name: string;
 
-  @Column()
-  address: string;
+  @OneToOne(() => Address, (address) => address.clinic, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'address_id' })
+  address: Address;
 
   @Column()
   phone: string;

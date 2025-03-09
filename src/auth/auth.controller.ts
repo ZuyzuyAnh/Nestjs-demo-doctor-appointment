@@ -2,7 +2,7 @@ import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/signIn.dto';
 import { Public } from './decorator/auth.decorator';
-import { RegisterDTO } from './dto/register.dto';
+import { RegisterDtO } from './dto/register.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -17,7 +17,7 @@ export class AuthController {
 
   @Post('register')
   @Public()
-  register(@Body() registerDto: RegisterDTO) {
+  register(@Body() registerDto: RegisterDtO) {
     return this.authService.register(registerDto);
   }
 }

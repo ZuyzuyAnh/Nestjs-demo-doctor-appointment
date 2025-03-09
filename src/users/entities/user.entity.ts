@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Exclude } from 'class-transformer';
 import {
   Column,
@@ -25,7 +24,7 @@ export class User {
   @Exclude()
   password: string;
 
-  @Column()
+  @Column({ default: false })
   isActive: boolean;
 
   @Column()

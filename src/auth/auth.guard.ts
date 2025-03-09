@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   CanActivate,
   ExecutionContext,
@@ -11,7 +10,7 @@ import { IS_ADMIN_KEY, IS_PUBLIC_KEY } from './decorator/auth.decorator';
 import { Reflector } from '@nestjs/core';
 import { Role } from 'src/users/entities/role.enum';
 import { TokenPayloadDto } from './dto/tokenPayload.dto';
-import { RoleAdminRequiredException } from './exception/adminRequire.exception';
+import { RoleAdminRequiredException } from '../exception/adminRequire.exception';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

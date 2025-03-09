@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { IsEmail, IsNotEmpty, MaxLength, MinLength } from 'class-validator';
 
-export class RegisterDTO {
+export class RegisterDtO {
   @IsNotEmpty()
   fullName: string;
 

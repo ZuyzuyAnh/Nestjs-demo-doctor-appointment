@@ -4,9 +4,9 @@ import { SignInDto } from './dto/signIn.dto';
 import { JwtService } from '@nestjs/jwt';
 import { TokenPayloadDto } from './dto/tokenPayload.dto';
 import * as bcrypt from 'bcrypt';
-import { RegisterDTO } from './dto/register.dto';
+import { RegisterDtO } from './dto/register.dto';
 import { User } from 'src/users/entities/user.entity';
-import { DuplicateFieldException } from './exception/duplicateField.exception';
+import { DuplicateFieldException } from '../exception/duplicateField.exception';
 
 @Injectable()
 export class AuthService {
@@ -39,7 +39,7 @@ export class AuthService {
     return { token };
   }
 
-  async register(registerDto: RegisterDTO) {
+  async register(registerDto: RegisterDtO) {
     const existingUsers = await this.usersService.findByEmailAndPhone(
       registerDto.email,
       registerDto.phoneNumber,

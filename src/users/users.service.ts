@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserNotFoundException } from './exceptions/userNotFound.exception';
+import { CustomNotFoundException } from 'src/exception/notfound.exception';
 
 @Injectable()
 export class UsersService {
@@ -22,7 +22,7 @@ export class UsersService {
   async findOneById(id: number) {
     const user = await this.usersRepository.findOneBy({ id: id });
     if (!user) {
-      throw new UserNotFoundException(id);
+      throw new CustomNotFoundException('user', id);
     }
 
     return user;
