@@ -57,10 +57,13 @@ export class ClinicsService {
   }
 
   async findOneById(id: number) {
-    return this.clinicsRepository.findOne({
-      where: { id },
-      relations: ['address'],
-    });
+    const clinic = await this.clinicsRepository.findOneBy({ id });
+
+    if (!clinic) {
+      throw new CustomNotFoundException('Clinic', id);
+    }
+
+    return clinic;
   }
 
   async update(id: number, updateClinicDto: UpdateClinicDto) {
@@ -73,12 +76,12 @@ export class ClinicsService {
       throw new CustomNotFoundException('Clinic', id);
     }
 
-    Object.assign(clinic, updateClinicDto);
-
     if (updateClinicDto.address && clinic.address) {
       const addressId = clinic.address.id;
       await this.addressService.update(addressId, updateClinicDto.address);
     }
+
+    Object.assign(clinic, updateClinicDto);
 
     return await this.clinicsRepository.save(clinic);
   }

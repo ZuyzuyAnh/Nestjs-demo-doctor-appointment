@@ -10,6 +10,8 @@ import { DuplicateFieldException } from '../exception/duplicateField.exception';
 
 @Injectable()
 export class AuthService {
+  private readonly entityName = 'User';
+
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
@@ -49,11 +51,16 @@ export class AuthService {
       const existingUser = existingUsers[0];
 
       if (existingUser.email === registerDto.email) {
-        throw new DuplicateFieldException('Email', registerDto.email);
+        throw new DuplicateFieldException(
+          this.entityName,
+          'Email',
+          registerDto.email,
+        );
       }
 
       if (existingUser.phoneNumber === registerDto.phoneNumber) {
         throw new DuplicateFieldException(
+          this.entityName,
           'Phone number',
           registerDto.phoneNumber,
         );
@@ -62,11 +69,9 @@ export class AuthService {
 
     const passwordHash = await this.hashPassword(registerDto.password);
 
-    const user = await this.usersService.create(
+    return await this.usersService.create(
       new User({ ...registerDto, password: passwordHash }),
     );
-
-    return user;
   }
 
   private async createJWT(tokenPayload: TokenPayloadDto) {

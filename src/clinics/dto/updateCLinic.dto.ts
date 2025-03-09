@@ -1,22 +1,4 @@
-import { Type } from 'class-transformer';
-import { IsEmail, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { UpdateAddressDto } from 'src/address/dto/updateAddress.dto';
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateClinicDto } from './createClinic.dto';
 
-export class UpdateClinicDto {
-  @IsOptional()
-  @IsString()
-  name?: string;
-
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => UpdateAddressDto)
-  address?: UpdateAddressDto;
-
-  @IsOptional()
-  @IsString()
-  phone?: string;
-
-  @IsOptional()
-  @IsEmail()
-  email?: string;
-}
+export class UpdateClinicDto extends PartialType(CreateClinicDto) {}

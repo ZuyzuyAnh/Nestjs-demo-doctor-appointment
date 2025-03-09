@@ -12,6 +12,7 @@ import {
 import { ClinicsService } from './clinics.service';
 import { AdminOnly } from 'src/auth/decorator/auth.decorator';
 import { CreateClinicDto } from './dto/createClinic.dto';
+import { UpdateClinicDto } from './dto/updateCLinic.dto';
 
 @Controller('clinics')
 export class ClinicsController {
@@ -39,7 +40,7 @@ export class ClinicsController {
   @AdminOnly()
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateClinicDto: CreateClinicDto,
+    @Body() updateClinicDto: UpdateClinicDto,
   ) {
     return this.clinicsService.update(id, updateClinicDto);
   }

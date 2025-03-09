@@ -65,6 +65,6 @@ export class AddressService {
 
     Object.assign(address, updateAddressDto);
 
-    return await this.addressRepository.save(address);
+    await this.addressRepository.save(address);
   }
 }
