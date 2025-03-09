@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Clinic } from './entities/clinic.entity';
-import { CreateClinicDto } from './dto/createClinic.dto';
+import { CreateClinicDto } from './dto/create_clinic.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CustomNotFoundException } from 'src/exception/notfound.exception';
-import { UpdateClinicDto } from './dto/updateCLinic.dto';
+import { CustomNotFoundException } from 'src/exception/not_found.exception';
+import { Update_cLinicDto } from './dto/update_cLinic.dto';
 import { AddressService } from '../address/services/address.service';
 import { PaginationResponseDto } from '../utils/pagination.response.dto';
 
@@ -66,7 +66,7 @@ export class ClinicsService {
     return clinic;
   }
 
-  async update(id: number, updateClinicDto: UpdateClinicDto) {
+  async update(id: number, updateClinicDto: Update_cLinicDto) {
     const clinic = await this.clinicsRepository.findOne({
       where: { id },
       relations: ['address'],

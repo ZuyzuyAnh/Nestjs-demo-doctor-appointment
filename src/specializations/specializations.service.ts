@@ -4,9 +4,9 @@ import { UpdateSpecializationDto } from './dto/update-specialization.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Specialization } from './entities/specialization.entity';
 import { Repository } from 'typeorm';
-import { DuplicateFieldException } from '../exception/duplicateField.exception';
+import { DuplicateFieldException } from '../exception/duplicate_field.exception';
 import { PaginationResponseDto } from '../utils/pagination.response.dto';
-import { CustomNotFoundException } from '../exception/notfound.exception';
+import { CustomNotFoundException } from '../exception/not_found.exception';
 
 @Injectable()
 export class SpecializationsService {

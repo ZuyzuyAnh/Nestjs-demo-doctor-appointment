@@ -6,7 +6,7 @@ import { TokenPayloadDto } from './dto/tokenPayload.dto';
 import * as bcrypt from 'bcrypt';
 import { RegisterDtO } from './dto/register.dto';
 import { User } from 'src/users/entities/user.entity';
-import { DuplicateFieldException } from '../exception/duplicateField.exception';
+import { DuplicateFieldException } from '../exception/duplicate_field.exception';
 
 @Injectable()
 export class AuthService {

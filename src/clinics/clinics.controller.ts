@@ -11,8 +11,8 @@ import {
 } from '@nestjs/common';
 import { ClinicsService } from './clinics.service';
 import { AdminOnly } from 'src/auth/decorator/auth.decorator';
-import { CreateClinicDto } from './dto/createClinic.dto';
-import { UpdateClinicDto } from './dto/updateCLinic.dto';
+import { CreateClinicDto } from './dto/create_clinic.dto';
+import { Update_cLinicDto } from './dto/update_cLinic.dto';
 
 @Controller('clinics')
 export class ClinicsController {
@@ -40,7 +40,7 @@ export class ClinicsController {
   @AdminOnly()
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateClinicDto: UpdateClinicDto,
+    @Body() updateClinicDto: Update_cLinicDto,
   ) {
     return this.clinicsService.update(id, updateClinicDto);
   }
