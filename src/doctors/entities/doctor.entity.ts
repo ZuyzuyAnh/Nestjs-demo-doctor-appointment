@@ -38,4 +38,12 @@ export class Doctor {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  getStartTime(): number {
+    return +this.workingHours.split('-')[0];
+  }
+
+  getEndTime(): number {
+    return +this.workingHours.split('-')[1];
+  }
 }

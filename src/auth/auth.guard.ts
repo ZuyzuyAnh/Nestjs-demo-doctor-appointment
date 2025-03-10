@@ -20,53 +20,58 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext) {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-    if (isPublic) {
+    const request = context.switchToHttp().getRequest<Request>();
+
+    if (this.isPublicRoute(context)) {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest<Request>();
     const token = this.extractTokenFromHeader(request);
-
     if (!token) {
       throw new UnauthorizedException('Unauthorized');
     }
 
-    try {
-      const payload: TokenPayloadDto = await this.jwtService.verifyAsync(
-        token,
-        {
-          secret: process.env.JWT_SECRET,
-        },
-      );
+    const payload = await this.verifyToken(token);
+    request['user'] = payload;
 
-      request['user'] = payload;
-
-      const isAdminRequired = this.reflector.getAllAndOverride<boolean>(
-        IS_ADMIN_KEY,
-        [context.getHandler(), context.getClass()],
-      );
-
-      if (isAdminRequired) {
-        const userRoles = payload.role || [];
-        const isAdmin = userRoles.includes(Role.Admin);
-
-        if (!isAdmin) {
-          throw new RoleAdminRequiredException();
-        }
-      }
-    } catch {
-      throw new UnauthorizedException('Unauthorized');
+    if (this.isAdminRoute(context) && !this.isAdmin(payload)) {
+      throw new RoleAdminRequiredException();
     }
 
     return true;
   }
 
+  private isPublicRoute(context: ExecutionContext): boolean {
+    return this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+  }
+
   private extractTokenFromHeader(request: Request): string | undefined {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
+  }
+
+  private async verifyToken(token: string): Promise<TokenPayloadDto> {
+    try {
+      return await this.jwtService.verifyAsync(token, {
+        secret: process.env.JWT_SECRET,
+      });
+    } catch {
+      throw new UnauthorizedException('Unauthorized');
+    }
+  }
+
+  private isAdminRoute(context: ExecutionContext): boolean {
+    return this.reflector.getAllAndOverride<boolean>(IS_ADMIN_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+  }
+
+  private isAdmin(payload: TokenPayloadDto): boolean {
+    const userRoles = payload.role || [];
+    return userRoles.includes(Role.Admin);
   }
 }
