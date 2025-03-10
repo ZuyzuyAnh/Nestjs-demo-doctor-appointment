@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,6 +14,7 @@ import { CustomNotFoundException } from '../exception/not_found.exception';
 import { TokenPayloadDto } from '../auth/dto/tokenPayload.dto';
 import { Role } from '../users/entities/role.enum';
 import { PaginationResponseDto } from '../utils/pagination.response.dto';
+import AppointmentStatus from './entities/apoointment-status.enum';
 
 @Injectable()
 export class AppointmentsService {
@@ -83,47 +85,70 @@ export class AppointmentsService {
     payload: TokenPayloadDto,
     page: number = 1,
     limit: number = 10,
+    status?: AppointmentStatus,
+    startDate?: Date,
+    endDate?: Date,
   ) {
-    let result: Appointment[];
-    let total: number;
+    const queryBuilder =
+      this.appointmentRepository.createQueryBuilder('appointment');
 
     if (payload.role.includes(Role.Doctor)) {
-      [result, total] = await this.appointmentRepository.findAndCount({
-        where: { doctor: { user: { id: payload.id } } },
-        skip: (page - 1) * limit,
-        take: limit,
+      queryBuilder.where('appointment.doctor.user.id = :userId', {
+        userId: payload.id,
       });
     } else {
-      [result, total] = await this.appointmentRepository.findAndCount({
-        where: { user: { id: payload.id } },
-        skip: (page - 1) * limit,
-        take: limit,
+      queryBuilder.where('appointment.user.id = :userId', {
+        userId: payload.id,
       });
     }
 
+    if (status) {
+      queryBuilder.andWhere('appointment.status = :status', { status });
+    }
+
+    if (startDate && endDate) {
+      queryBuilder.andWhere(
+        'appointment.appointmentDateTime BETWEEN :startDate AND :endDate',
+        {
+          startDate,
+          endDate,
+        },
+      );
+    }
+
+    queryBuilder.skip((page - 1) * limit).take(limit);
+
+    const [result, total] = await queryBuilder.getManyAndCount();
     return new PaginationResponseDto(page, limit, result, total);
   }
 
-  async findOne(payload: TokenPayloadDto, id: number) {
-    let apponintment: Appointment | null = null;
+  async cancelAppointment(payload: TokenPayloadDto, id: number) {
+    const appointment = await this.appointmentRepository.findOneBy({ id });
 
-    if (payload.role.includes(Role.Doctor)) {
-      apponintment = await this.appointmentRepository.findOneBy({
-        id: id,
-        doctor: { user: { id: payload.id } },
-      });
-    } else {
-      apponintment = await this.appointmentRepository.findOneBy({
-        id: id,
-        user: { id: payload.id },
-      });
-    }
-
-    if (!apponintment) {
+    if (!appointment) {
       throw new CustomNotFoundException('Appointment', id);
     }
 
-    return apponintment;
+    if (
+      payload.role.includes(Role.Doctor) &&
+      appointment.doctor.user.id !== payload.id
+    ) {
+      throw new UnauthorizedException(
+        'You are not authorized to cancel this appointment',
+      );
+    }
+
+    if (
+      payload.role.includes(Role.User) &&
+      appointment.user.id !== payload.id
+    ) {
+      throw new UnauthorizedException(
+        'You are not authorized to cancel this appointment',
+      );
+    }
+
+    appointment.status = AppointmentStatus.CANCELLED;
+    return this.appointmentRepository.save(appointment);
   }
 
   async remove(id: number) {

@@ -4,6 +4,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -11,6 +12,7 @@ import {
 import { User } from '../../users/entities/user.entity';
 import { Specialization } from '../../specializations/entities/specialization.entity';
 import { Clinic } from '../../clinics/entities/clinic.entity';
+import { Rating } from '../../ratings/entities/rating.entity';
 
 @Entity()
 export class Doctor {
@@ -26,6 +28,9 @@ export class Doctor {
   @OneToOne(() => User)
   @JoinColumn()
   user: User;
+
+  @OneToMany(() => Rating, (rating) => rating.doctor)
+  ratings: Rating[];
 
   @ManyToOne(() => Specialization)
   specialization: Specialization;

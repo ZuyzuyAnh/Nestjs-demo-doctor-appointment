@@ -3,17 +3,18 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Req,
   Query,
   ParseIntPipe,
+  Patch,
 } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
-import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { TokenPayloadDto } from '../auth/dto/tokenPayload.dto';
+import AppointmentStatus from './entities/apoointment-status.enum';
+import { AdminOnly } from '../auth/decorator/auth.decorator';
 
 @Controller('appointments')
 export class AppointmentsController {
@@ -33,18 +34,29 @@ export class AppointmentsController {
     @Req() request: Request,
     @Query('page', ParseIntPipe) page: number = 1,
     @Query('limit', ParseIntPipe) limit: number = 10,
+    @Query('status') status?: AppointmentStatus,
+    @Query('startDate') startDate?: Date,
+    @Query('endDate') endDate?: Date,
   ) {
     const payload = request['user'] as TokenPayloadDto;
-    return this.appointmentsService.findAll(payload, page, limit);
+    return this.appointmentsService.findAll(
+      payload,
+      page,
+      limit,
+      status,
+      startDate,
+      endDate,
+    );
   }
 
-  @Get(':id')
-  findOne(@Req() request: Request, @Param('id') id: string) {
+  @Patch(':id')
+  cancel(@Req() request: Request, @Param('id', ParseIntPipe) id: number) {
     const payload = request['user'] as TokenPayloadDto;
-    return this.appointmentsService.findOne(payload, +id);
+    return this.appointmentsService.cancelAppointment(payload, id);
   }
 
   @Delete(':id')
+  @AdminOnly()
   remove(@Param('id') id: string) {
     return this.appointmentsService.remove(+id);
   }

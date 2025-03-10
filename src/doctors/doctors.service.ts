@@ -31,6 +31,8 @@ export class DoctorsService {
       throw new FromUserToDoctorException(userId);
     }
 
+    user.roles.push(Role.Doctor);
+
     const doctor = this.doctorRepository.create({
       ...toDoctorDto,
       user,
