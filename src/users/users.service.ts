@@ -33,4 +33,10 @@ export class UsersService {
       where: [{ email }, { phoneNumber }],
     });
   }
+
+  async activateUser(id: number): Promise<User> {
+    const user = await this.findOneById(id);
+    user.isActive = true;
+    return this.usersRepository.save(user);
+  }
 }
