@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from './config/configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -10,6 +10,7 @@ import { DoctorsModule } from './doctors/doctors.module';
 import { SpecializationsModule } from './specializations/specializations.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { RatingsModule } from './ratings/ratings.module';
+import { logger } from './middleware/logger.middleware';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { RatingsModule } from './ratings/ratings.module';
         database: configService.get('DATABASE_NAME'),
         autoLoadEntities: true,
         synchronize: true,
+        ssl: false,
       }),
     }),
     UsersModule,
@@ -40,5 +42,11 @@ import { RatingsModule } from './ratings/ratings.module';
     AppointmentsModule,
     RatingsModule,
   ],
+  controllers: [],
+  providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(logger).forRoutes('*');
+  }
+}

@@ -5,7 +5,6 @@ import {
   HttpStatus,
   Post,
   Request,
-  Get,
   Query,
   BadRequestException,
 } from '@nestjs/common';
@@ -46,7 +45,7 @@ export class AuthController {
     return { message: 'Logged out successfully' };
   }
 
-  @Get('verify-email')
+  @Post('verify-email')
   @Public()
   async verifyEmail(@Query('token') token: string) {
     const verified = await this.authService.verifyEmail(token);

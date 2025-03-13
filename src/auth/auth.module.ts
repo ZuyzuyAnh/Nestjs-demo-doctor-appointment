@@ -22,9 +22,9 @@ import { EmailModule } from 'src/email/email.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get('JWT_ACCESS_SECRET'),
+        secret: configService.get<string>('JWT_ACCESS_SECRET'),
         signOptions: {
-          expiresIn: configService.get('JWT_EXPIRATION_TIME'),
+          expiresIn: configService.get<string>('JWT_EXPIRATION_TIME'),
         },
       }),
     }),
@@ -39,5 +39,6 @@ import { EmailModule } from 'src/email/email.module';
       useClass: AuthGuard,
     },
   ],
+  exports: [AuthService],
 })
 export class AuthModule {}

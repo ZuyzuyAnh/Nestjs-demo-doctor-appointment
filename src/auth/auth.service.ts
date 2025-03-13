@@ -12,11 +12,13 @@ import { RefreshTokenDto } from './dto/refreshToken.dto';
 import { RefreshTokenRepository } from './repositories/refresh-token.repository';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { EmailVerificationRepository } from './repositories/email-verification.repository';
+import { Logger } from '@nestjs/common';
 import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class AuthService {
   private readonly entityName = 'User';
+  private readonly logger = new Logger(AuthService.name);
 
   constructor(
     private readonly usersService: UsersService,
@@ -45,6 +47,19 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    if (!user.isActive) {
+      throw new UnauthorizedException('User is not active');
+    }
+
+    const tokens = await this.createTokens(user);
+
+    return {
+      user,
+      ...tokens,
+    };
+  }
+
+  private async createTokens(user: User) {
     const accessToken = await this.createAccessToken(
       new TokenPayloadDto(user.id, user.roles),
     );
@@ -105,10 +120,7 @@ export class AuthService {
 
     const verificationToken = await this.createEmailVerificationToken(user.id);
 
-    await this.emailService.sendVerificationEmail(
-      user.email,
-      verificationToken,
-    );
+    await this.emailService.sendEmailBackground(user.email, verificationToken);
 
     return user;
   }
